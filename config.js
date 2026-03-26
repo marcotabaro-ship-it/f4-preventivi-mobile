@@ -8,4 +8,4 @@
 
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxmWf3WUGzWSzvNR9GsyvhHsxquNOIinNgnlXq2vMRliL0fMNjqif3gz5fDlGFcl5JF/exec';
 const APP_VERSION = '1.0 Mobile';
-const LOGO_URL    = 'https://lh3.googleusercontent.com/d/1mCdX0CufflOWSDbxGCjJmtFOlzX1QNVw';
+const LOGO_URL    = 'icon.png';
