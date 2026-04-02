@@ -1,11 +1,3 @@
-// ============================================================
-// config.js — CONFIGURAZIONE APP
-// ============================================================
-// Sostituisci YOUR_DEPLOYMENT_ID con il tuo ID di deployment
-// L'URL ha questa forma:
-// https://script.google.com/macros/s/AKfycb.../exec
-// ============================================================
-
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxmWf3WUGzWSzvNR9GsyvhHsxquNOIinNgnlXq2vMRliL0fMNjqif3gz5fDlGFcl5JF/exec';
-const APP_VERSION = '1.0 Mobile';
+const SCRIPT_URL  = 'https://script.google.com/macros/s/AKfycbyArhCukLkasgM2sXr8cM7lKAxPzSFqGvaU9PNmiviC5Y69qw3qPqpYsm_bq1AFWdq-/exec';
+const APP_VERSION = '2.0 Mobile STAGING';
 const LOGO_URL    = 'icon.png';
