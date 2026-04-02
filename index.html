@@ -22,10 +22,9 @@
 <div id="loginScreen" class="screen">
   <div class="login-bg"></div>
   <div class="login-card">
-    <img id="loginLogo" src="icon.png"
-         class="login-logo" alt="Finestra 4">
+    <img id="loginLogo" src="icon.png" class="login-logo" alt="Finestra 4">
     <h1 class="login-title">Gestione Preventivi</h1>
-    <p class="login-sub">Accesso Riservato — App Mobile</p>
+    <p class="login-sub">Accesso Riservato — App Mobile <span class="v2-badge">V 2.0</span></p>
 
     <div id="loginError" class="login-error" style="display:none"></div>
 
@@ -67,10 +66,9 @@
 
   <!-- HEADER FISSO -->
   <header id="appHeader">
-    <img src="icon.png"
-         class="header-logo" alt="F4">
+    <img src="icon.png" class="header-logo" alt="F4">
     <div class="header-info">
-      <span class="header-title">Preventivi F4</span>
+      <span class="header-title">Preventivi F4 <span class="v2-badge-header">V2</span></span>
       <span id="headerUser" class="header-user"></span>
     </div>
     <div class="header-actions">
@@ -88,11 +86,12 @@
 
   <!-- AREA CONTENUTO PRINCIPALE -->
   <main id="mainContent">
-    <div id="pageKpi"        class="page" style="display:none"></div>
+    <div id="pageKpi"         class="page" style="display:none"></div>
     <div id="pageLavorazione" class="page" style="display:none"></div>
-    <div id="pageRicevuti"   class="page" style="display:none"></div>
-    <div id="pageVinti"      class="page" style="display:none"></div>
-    <div id="pageRubrica"    class="page" style="display:none"></div>
+    <div id="pageRicevuti"    class="page" style="display:none"></div>
+    <div id="pageVinti"       class="page" style="display:none"></div>
+    <div id="pageRubrica"     class="page" style="display:none"></div>
+    <div id="pageAdmin"       class="page" style="display:none"></div>
   </main>
 
   <!-- NAVIGAZIONE INFERIORE -->
@@ -117,28 +116,26 @@
       <span class="nav-icon">📇</span>
       <span class="nav-label">Rubrica</span>
     </button>
+    <!-- M4: Admin nav — nascosto di default, visibile solo ai SuperUser -->
+    <button id="navAdmin" onclick="navigateTo('admin')" style="display:none">
+      <span class="nav-icon">🛠️</span>
+      <span class="nav-label">Admin</span>
+    </button>
   </nav>
 
   <!-- OVERLAY FILTRI -->
-  <div id="filterOverlay" class="drawer-overlay" style="display:none"
-       onclick="closeFilterDrawer()"></div>
+  <div id="filterOverlay" class="drawer-overlay" style="display:none" onclick="closeFilterDrawer()"></div>
 
-  <!-- DRAWER FILTRI (slide-up dal basso) -->
+  <!-- DRAWER FILTRI -->
   <div id="filterDrawer" class="filter-drawer">
     <div class="drawer-handle"></div>
-    <h3 class="drawer-title">⚙️ Filtri e Periodo Estrazione</h3>
+    <h3 class="drawer-title">Filtri e Periodo Estrazione</h3>
 
     <div class="drawer-section">
       <label>Periodo di Estrazione Dati</label>
       <div class="date-row">
-        <div class="form-group-small">
-          <label>Dal</label>
-          <input type="date" id="filterDal">
-        </div>
-        <div class="form-group-small">
-          <label>Al</label>
-          <input type="date" id="filterAl">
-        </div>
+        <div class="form-group-small"><label>Dal</label><input type="date" id="filterDal"></div>
+        <div class="form-group-small"><label>Al</label><input type="date" id="filterAl"></div>
       </div>
     </div>
 
