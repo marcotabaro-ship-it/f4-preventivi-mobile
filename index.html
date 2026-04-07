@@ -1,54 +1,90 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#2c3e50">
-<meta name="apple-mobile-web-app-title" content="F4 Preventivi">
-<title>F4 Preventivi</title>
-<link rel="icon" type="image/png" href="icon.png">
-<link rel="apple-touch-icon" href="icon.png">
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#2c3e50">
+  <meta name="apple-mobile-web-app-title" content="F4 Preventivi">
+  <meta name="application-name" content="F4 Preventivi">
+  <title>F4 Preventivi</title>
+  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="shortcut icon" href="icon.png">
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+<!-- ============================================================
+     SCHERMATA LOGIN
+     ============================================================ -->
 <div id="loginScreen" class="screen">
   <div class="login-bg"></div>
   <div class="login-card">
-    <img id="loginLogo" src="icon.png" class="login-logo" alt="F4">
+    <img id="loginLogo" src="icon.png" class="login-logo" alt="Finestra 4">
     <h1 class="login-title">Gestione Preventivi</h1>
     <p class="login-sub">Accesso Riservato — App Mobile <span class="v2-badge">V 2.0</span></p>
+
     <div id="loginError" class="login-error" style="display:none"></div>
-    <div class="form-group"><label>Reparto Operativo</label><select id="loginReparto" onchange="onRepartoChange()"><option value="">Caricamento reparti...</option></select></div>
-    <div id="loginNomeBox" class="form-group" style="display:none"><label>Identificativo Profilo</label><select id="loginNome"><option value="">Seleziona identificativo...</option></select></div>
-    <div class="form-group"><label>Password di Sicurezza</label><input type="password" id="loginPwd" placeholder="Inserisci la password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+
+    <div class="form-group">
+      <label>Reparto Operativo</label>
+      <select id="loginReparto" onchange="onRepartoChange()">
+        <option value="">Caricamento reparti...</option>
+      </select>
+    </div>
+
+    <div id="loginNomeBox" class="form-group" style="display:none">
+      <label>Identificativo Profilo</label>
+      <select id="loginNome">
+        <option value="">Seleziona identificativo...</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Password di Sicurezza</label>
+      <input type="password" id="loginPwd" placeholder="Inserisci la password"
+             onkeydown="if(event.key==='Enter') doLogin()">
+    </div>
+
     <button id="btnLogin" class="btn-login" onclick="doLogin()">Accedi al Gestionale</button>
-    <div id="loginLoader" class="login-loader" style="display:none"><div class="spinner"></div></div>
+
+    <div id="loginLoader" class="login-loader" style="display:none">
+      <div class="spinner"></div>
+    </div>
+
     <p class="login-version" id="loginVersion"></p>
   </div>
 </div>
 
+
+<!-- ============================================================
+     APP PRINCIPALE
+     ============================================================ -->
 <div id="appScreen" class="screen" style="display:none">
+
+  <!-- HEADER FISSO -->
   <header id="appHeader">
-    <img src="icon.png" class="header-logo" alt="F4" onclick="navigateTo('kpi')" style="cursor:pointer;">
+    <img src="icon.png" class="header-logo" alt="F4">
     <div class="header-info">
       <span class="header-title">Preventivi F4 <span class="v2-badge-header">V2</span></span>
       <span id="headerUser" class="header-user"></span>
     </div>
     <div class="header-actions">
-      <button class="icon-btn" onclick="loadData()" title="Aggiorna">&#128260;</button>
-      <button class="icon-btn" onclick="openFilterDrawer()" title="Filtri">&#9881;</button>
-      <button class="icon-btn" onclick="logout()" title="Esci">&#128682;</button>
+      <button class="icon-btn" onclick="loadData()" title="Aggiorna dati">🔄</button>
+      <button class="icon-btn" onclick="openFilterDrawer()" title="Filtri e periodo">⚙️</button>
+      <button class="icon-btn" onclick="logout()" title="Disconnetti">🚪</button>
     </div>
   </header>
 
+  <!-- SPINNER GLOBALE -->
   <div id="globalSpinner" class="global-spinner" style="display:none">
     <div class="spinner-large"></div>
     <p>Caricamento dati...</p>
   </div>
 
+  <!-- AREA CONTENUTO PRINCIPALE -->
   <main id="mainContent">
     <div id="pageKpi"         class="page" style="display:none"></div>
     <div id="pageLavorazione" class="page" style="display:none"></div>
@@ -56,41 +92,97 @@
     <div id="pageVinti"       class="page" style="display:none"></div>
     <div id="pageRubrica"     class="page" style="display:none"></div>
     <div id="pageAdmin"       class="page" style="display:none"></div>
+    <div id="pageContatti"    class="page" style="display:none"></div>
   </main>
 
+  <!-- NAVIGAZIONE INFERIORE -->
   <nav id="bottomNav">
-    <button id="navKpi"         onclick="navigateTo('kpi')"><span class="nav-icon">&#127968;</span><span class="nav-label">Home</span></button>
-    <button id="navLavorazione" onclick="navigateTo('lavorazione')"><span class="nav-icon">&#128295;</span><span class="nav-label">Lavori</span></button>
-    <button id="navRicevuti"    onclick="navigateTo('ricevuti')"><span class="nav-icon">&#128229;</span><span class="nav-label">Ricevuti</span></button>
-    <button id="navVinti"       onclick="navigateTo('vinti')"><span class="nav-icon">&#127942;</span><span class="nav-label">Vinti</span></button>
-    <button id="navRubrica"     onclick="navigateTo('rubrica')"><span class="nav-icon">&#128218;</span><span class="nav-label">Rubrica</span></button>
-    <button id="navAdmin"       onclick="navigateTo('admin')" style="display:none"><span class="nav-icon">&#128295;</span><span class="nav-label">Admin</span></button>
+    <button id="navKpi" onclick="navigateTo('kpi')">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Home</span>
+    </button>
+    <button id="navLavorazione" onclick="navigateTo('lavorazione')">
+      <span class="nav-icon">🔧</span>
+      <span class="nav-label">Lavori</span>
+    </button>
+    <button id="navRicevuti" onclick="navigateTo('ricevuti')">
+      <span class="nav-icon">📥</span>
+      <span class="nav-label">Ricevuti</span>
+    </button>
+    <button id="navVinti" onclick="navigateTo('vinti')">
+      <span class="nav-icon">🏆</span>
+      <span class="nav-label">Vinti</span>
+    </button>
+    <button id="navRubrica" onclick="navigateTo('rubrica')">
+      <span class="nav-icon">📇</span>
+      <span class="nav-label">Rubrica</span>
+    </button>
+    <button id="navContatti" onclick="navigateTo('contatti')" style="display:none">
+      <span class="nav-icon">&#128221;</span>
+      <span class="nav-label">Contatti</span>
+    </button>
+    <!-- M4: Admin nav — nascosto di default, visibile solo ai SuperUser -->
+    <button id="navAdmin" onclick="navigateTo('admin')" style="display:none">
+      <span class="nav-icon">🛠️</span>
+      <span class="nav-label">Admin</span>
+    </button>
   </nav>
 
+  <!-- OVERLAY FILTRI -->
   <div id="filterOverlay" class="drawer-overlay" style="display:none" onclick="closeFilterDrawer()"></div>
+
+  <!-- DRAWER FILTRI -->
   <div id="filterDrawer" class="filter-drawer">
     <div class="drawer-handle"></div>
     <h3 class="drawer-title">Filtri e Periodo Estrazione</h3>
-    <div class="drawer-section"><label>Periodo di Estrazione Dati</label>
+
+    <div class="drawer-section">
+      <label>Periodo di Estrazione Dati</label>
       <div class="date-row">
         <div class="form-group-small"><label>Dal</label><input type="date" id="filterDal"></div>
         <div class="form-group-small"><label>Al</label><input type="date" id="filterAl"></div>
       </div>
     </div>
-    <div id="filterCommBox" class="drawer-section" style="display:none"><label>Filtra per Commerciale</label><select id="filterComm"><option value="">Tutti (Visione Globale)</option></select></div>
-    <div class="drawer-section"><label>Tipo Intervento</label><select id="filterTipo"><option value="">Tutti</option><option value="Nuova costruzione">Nuova costruzione</option><option value="Sostituzione">Sostituzione</option><option value="Ristrutturazione">Ristrutturazione</option><option value="Sola fornitura">Sola fornitura</option></select></div>
-    <div class="drawer-section"><label>Sigla Prodotto</label><input type="text" id="filterSigla" placeholder="Es. AT075, HF510, PORTONCINI..."></div>
-    <div class="drawer-buttons">
-      <button class="btn-secondary" onclick="resetFilters()">&#128260; Azzera</button>
-      <button class="btn-primary" onclick="applyFilters()">&#10003; Applica e Carica</button>
+
+    <div id="filterCommBox" class="drawer-section" style="display:none">
+      <label>Filtra per Commerciale</label>
+      <select id="filterComm">
+        <option value="">Tutti (Visione Globale)</option>
+      </select>
     </div>
+
+    <div class="drawer-section">
+      <label>Tipo Intervento</label>
+      <select id="filterTipo">
+        <option value="">Tutti</option>
+        <option value="Nuova costruzione">Nuova costruzione</option>
+        <option value="Sostituzione">Sostituzione</option>
+        <option value="Ristrutturazione">Ristrutturazione</option>
+        <option value="Sola fornitura">Sola fornitura</option>
+      </select>
+    </div>
+
+    <div class="drawer-section">
+      <label>Sigla Prodotto</label>
+      <input type="text" id="filterSigla" placeholder="Es. AT075, HF510, PORTONCINI...">
+    </div>
+
+    <div class="drawer-buttons">
+      <button class="btn-secondary" onclick="resetFilters()">🔄 Azzera</button>
+      <button class="btn-primary"   onclick="applyFilters()">✓ Applica e Carica</button>
+    </div>
+
     <p id="lastUpdateInfo" class="last-update-info"></p>
   </div>
-</div>
 
+</div><!-- /appScreen -->
+
+
+<!-- LIBRERIE -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 <script src="config.js"></script>
 <script src="app.js"></script>
+
 </body>
 </html>
