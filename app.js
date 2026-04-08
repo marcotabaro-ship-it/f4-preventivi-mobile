@@ -946,208 +946,157 @@ function showToast(msg, type = 'info') {
 
 
 // ============================================================
-// CONTATTI MOBILE — Acquisizione Clienti
+// CONTATTI MOBILE — Form COMPLETO (parità con web app)
 // ============================================================
 var _mobileUtenti = {};
 
 async function renderContattiMobile() {
   const page = document.getElementById('pageContatti');
   if (!page) return;
-
-  // Carica utenti se non ancora disponibili
   if (Object.keys(_mobileUtenti).length === 0) {
-    try {
-      const dati = await apiCall('getUtenti', {});
-      if (dati && typeof dati === 'object') _mobileUtenti = dati;
-    } catch(e) {}
+    try { const d=await apiCall('getUtenti',{}); if(d&&typeof d==='object') _mobileUtenti=d; } catch(e) {}
   }
-
-  const isComm = !STATE.isSuperUser && !STATE.isUfficio &&
-    !['Reception','Showroom','Segreteria'].some(r => STATE.role.includes(r));
-  const canVeraLista = STATE.isSuperUser || isComm;
-
-  // Opzioni commerciali per il select
-  let optsComm = '<option value="">-- Seleziona --</option>';
+  const noLista = ['Ufficio Preventivi','Reception','Showroom','Segreteria'].some(r=>(STATE.role||'').includes(r));
+  const canLista = STATE.isSuperUser || !noLista;
+  let optsComm = '<option value="">-- Seleziona commerciale --</option>';
   Object.keys(_mobileUtenti).forEach(ruolo => {
     if (['Ufficio Preventivi','Reception','Showroom','Segreteria'].includes(ruolo)) return;
-    (_mobileUtenti[ruolo] || []).forEach(u => {
-      optsComm += `<option value="${u}"${STATE.user === u ? ' selected' : ''}>${u}</option>`;
-    });
+    (_mobileUtenti[ruolo]||[]).forEach(u => { optsComm+=`<option value="${u}"${STATE.user===u?' selected':''}>${u}</option>`; });
   });
-
-  // Lista contatti (solo commerciali e admin)
   let listaHtml = '';
-  if (canVeraLista) {
+  if (canLista) {
     try {
-      const tutti = STATE.isSuperUser ? '1' : '0';
-      const comm = STATE.isSuperUser ? '' : STATE.user;
-      const lista = await apiCall('getContatti', { commerciale: comm, stato: 'ATTIVI', tutti: tutti });
-      if (lista && lista.length) {
-        listaHtml = `<div class="section-title" style="margin-top:24px;padding:0 4px;">I Miei Contatti (${lista.length})</div>`;
-        listaHtml += lista.map(c => {
-          const nome = (((c.cognome || '') + ' ' + (c.nome || '')).trim()) || c.ragioneSociale || 'N/D';
-          const colori = {
-            'NUOVO': '#0d9488',
-            'INCONTRO DA FISSARE': '#2563eb',
-            'INCONTRO FISSATO': '#7c3aed',
-            'AFFARE PER IL FUTURO': '#d97706',
-            'NON INTERESSANTE': '#9ca3af',
-            'CONVERTITO': '#059669'
-          };
-          const col = colori[c.stato] || '#6b7280';
+      const lista = await apiCall('getContatti',{commerciale:STATE.isSuperUser?'':STATE.user,stato:'ATTIVI',tutti:STATE.isSuperUser?'1':'0'});
+      const colori={'NUOVO':'#047857','INCONTRO DA FISSARE':'#2563eb','INCONTRO FISSATO':'#7c3aed','AFFARE PER IL FUTURO':'#d97706','NON INTERESSANTE':'#9ca3af','CONVERTITO':'#059669'};
+      if(lista&&lista.length){
+        listaHtml=`<div class="section-title" style="margin-top:24px;">I Miei Contatti (${lista.length})</div>`;
+        listaHtml+=lista.map(c=>{
+          const nome=(((c.cognome||'')+' '+(c.nome||'')).trim())||c.ragioneSociale||'N/D';
+          const col=colori[c.stato]||'#6b7280';
           return `<div class="preventivo-card" style="border-left:4px solid ${col};margin-bottom:10px;">
-            <div class="card-header">
-              <span class="card-id">${escHtml(nome)}</span>
-              <span class="badge" style="background:${col};font-size:10px;">${c.stato}</span>
-            </div>
-            <div class="card-row"><span class="card-label">&#128336;</span>
-              <span class="card-value">${c.ggDaInserimento || 0} gg da inserimento</span></div>
-            ${c.telefono ? `<div class="card-row"><span class="card-label">&#128222;</span>
-              <span class="card-value"><a href="tel:${c.telefono}" style="color:#2980b9;">${escHtml(c.telefono)}</a></span></div>` : ''}
-            ${c.comuneCliente ? `<div class="card-row"><span class="card-label">&#128205;</span>
-              <span class="card-value">${escHtml(c.comuneCliente)}</span></div>` : ''}
-            ${c.tipoIntervento ? `<div class="card-row"><span class="card-label">&#128295;</span>
-              <span class="card-value">${escHtml(c.tipoIntervento)}</span></div>` : ''}
+            <div class="card-header"><span class="card-id">${escHtml(nome)}</span><span class="badge" style="background:${col};font-size:10px;">${c.stato}</span></div>
+            <div class="card-row"><span class="card-label">&#128336;</span><span class="card-value">${c.ggDaInserimento||0} gg</span></div>
+            ${c.telefono?`<div class="card-row"><span class="card-label">&#128222;</span><span class="card-value"><a href="tel:${c.telefono}" style="color:#2980b9;">${escHtml(c.telefono)}</a></span></div>`:''}
+            ${c.comuneCliente?`<div class="card-row"><span class="card-label">&#128205;</span><span class="card-value">${escHtml(c.comuneCliente)}</span></div>`:''}
           </div>`;
         }).join('');
-      } else {
-        listaHtml = '<p style="color:#7f8c8d;text-align:center;padding:16px;">Nessun contatto attivo.</p>';
-      }
-    } catch(e) {
-      listaHtml = '<p style="color:#e74c3c;padding:12px;">Errore caricamento contatti.</p>';
-    }
+      } else listaHtml='<p style="color:#7f8c8d;text-align:center;padding:16px;">Nessun contatto attivo.</p>';
+    } catch(e){ listaHtml='<p style="color:#e74c3c;padding:12px;">Errore caricamento.</p>'; }
   }
-
-  const prodotti = ['Serramenti','Porte Interne','Oscuranti','Zanzariere','Garage',
-    'Ingressi Blindati','Ingressi Isolati','Parapetti','Davanzali','Pergola'];
-
-  page.innerHTML = `
-    <div style="padding:16px 16px 80px 16px;">
-      <div class="section-title">&#128221; Nuovo Contatto Cliente</div>
-
-      <div class="card" style="margin-bottom:12px;">
-        <div style="font-size:11px;font-weight:700;color:#0d9488;text-transform:uppercase;margin-bottom:12px;letter-spacing:0.5px;">A — Dati Anagrafici</div>
-        <div class="form-group"><label>Nome</label><input type="text" id="m_nome" placeholder="Nome"></div>
-        <div class="form-group"><label>Cognome</label><input type="text" id="m_cognome" placeholder="Cognome"></div>
-        <div class="form-group"><label>Ragione Sociale</label><input type="text" id="m_ragSoc" placeholder="Solo se azienda"></div>
-        <div class="form-group"><label>Telefono</label><input type="tel" id="m_tel" placeholder="+39"></div>
-        <div class="form-group"><label>E-mail</label><input type="email" id="m_email" placeholder="email@esempio.it"></div>
-        <div class="form-group"><label>Comune</label><input type="text" id="m_comune" placeholder="Comune"></div>
-        <div class="form-group"><label>Prov.</label><input type="text" id="m_prov" placeholder="BS" maxlength="2"></div>
+  const prodotti=['Serramenti','Porte Interne','Oscuranti','Zanzariere','Garage','Ingressi Blindati','Ingressi Isolati','Parapetti','Davanzali','Pergola'];
+  const gg=['Lunedi','Martedi','Mercoledi','Giovedi','Venerdi'];
+  page.innerHTML=`<div style="padding:16px 16px 80px 16px;">
+    <div class="section-title">&#128221; Nuovo Contatto Cliente</div>
+    <div class="card" style="margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:700;color:#047857;text-transform:uppercase;margin-bottom:10px;">A — Dati Anagrafici</div>
+      <div class="form-group"><label>Nome</label><input type="text" id="m_nome" placeholder="Nome"></div>
+      <div class="form-group"><label>Cognome</label><input type="text" id="m_cognome" placeholder="Cognome"></div>
+      <div class="form-group"><label>Ragione Sociale</label><input type="text" id="m_ragSoc" placeholder="Solo se azienda"></div>
+      <div class="form-group"><label>Telefono</label><input type="tel" id="m_tel" placeholder="+39"></div>
+      <div class="form-group"><label>E-mail</label><input type="email" id="m_email" placeholder="email@esempio.it"></div>
+      <div class="form-group"><label>Responsabile Interno F4</label><input type="text" id="m_respInt" placeholder="Chi gestisce il contatto"></div>
+      <div style="font-size:10px;font-weight:700;color:#374151;margin:10px 0 5px;">Indirizzo Cliente</div>
+      <div class="form-group"><label>Indirizzo</label><input type="text" id="m_ind" placeholder="Via/Piazza"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 2fr 1fr;gap:6px;">
+        <div class="form-group" style="margin:0;"><label>Civico</label><input type="text" id="m_civ" placeholder="N."></div>
+        <div class="form-group" style="margin:0;"><label>CAP</label><input type="text" id="m_cap" placeholder="CAP"></div>
+        <div class="form-group" style="margin:0;"><label>Comune</label><input type="text" id="m_com" placeholder="Comune"></div>
+        <div class="form-group" style="margin:0;"><label>Prov.</label><input type="text" id="m_prov" placeholder="BS" maxlength="2"></div>
       </div>
-
-      <div class="card" style="margin-bottom:12px;">
-        <div style="font-size:11px;font-weight:700;color:#2563eb;text-transform:uppercase;margin-bottom:12px;letter-spacing:0.5px;">B — Primo Contatto</div>
-        <div class="form-group"><label>Come ci ha conosciuti</label>
-          <select id="m_come">
-            <option value="">--</option>
-            <option>Showroom</option><option>Web / Internet</option><option>Passaparola</option>
-            <option>Fiera / Evento</option><option>Pubblicita</option><option>Social Media</option><option>Altro</option>
-          </select>
-        </div>
-        <div class="form-group"><label>Mezzo Primo Contatto</label>
-          <select id="m_mezzo">
-            <option value="">--</option>
-            <option>Telefono</option><option>E-mail</option><option>Di persona</option>
-            <option>WhatsApp</option><option>Web form</option>
-          </select>
-        </div>
+      <div style="font-size:10px;font-weight:700;color:#1d4ed8;margin:10px 0 5px;">Indirizzo Cantiere (se diverso)</div>
+      <div class="form-group"><label>Indirizzo Cantiere</label><input type="text" id="m_indC" placeholder="Via/Piazza"></div>
+      <div style="display:grid;grid-template-columns:1fr 2fr 1fr;gap:6px;">
+        <div class="form-group" style="margin:0;"><label>CAP</label><input type="text" id="m_capC" placeholder="CAP"></div>
+        <div class="form-group" style="margin:0;"><label>Comune</label><input type="text" id="m_comC" placeholder="Comune"></div>
+        <div class="form-group" style="margin:0;"><label>Prov.</label><input type="text" id="m_provC" placeholder="BS" maxlength="2"></div>
       </div>
-
-      <div class="card" style="margin-bottom:12px;">
-        <div style="font-size:11px;font-weight:700;color:#7c3aed;text-transform:uppercase;margin-bottom:12px;letter-spacing:0.5px;">C — Contesto Intervento</div>
-        <div class="form-group"><label>Tipo Intervento</label>
-          <select id="m_tipo">
-            <option value="">--</option>
-            <option>Nuova costruzione</option><option>Sostituzione</option>
-            <option>Ristrutturazione</option><option>Sola fornitura</option>
-          </select>
-        </div>
-        <div class="form-group"><label>Tipo Edificio</label>
-          <select id="m_edificio">
-            <option value="">--</option>
-            <option>Casa singola</option><option>Bifamiliare</option>
-            <option>Ville a schiera</option><option>Condominio</option>
-          </select>
-        </div>
-        <div style="margin-bottom:12px;">
-          <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:8px;">Prodotti di Interesse</div>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;">
-            ${prodotti.map(p => `<label style="display:flex;align-items:center;gap:6px;font-size:12px;padding:6px 10px;border-radius:16px;border:1px solid #e0e6ed;background:white;cursor:pointer;">
-              <input type="checkbox" class="m_prodotto" value="${p}" style="accent-color:#0d9488;"> ${p}
-            </label>`).join('')}
-          </div>
-        </div>
-        <div class="form-group"><label>Note (motivazione, richieste specifiche)</label>
-          <textarea id="m_note" rows="3" style="width:100%;padding:8px;border:1px solid #ccd1d9;border-radius:6px;font-size:13px;box-sizing:border-box;resize:vertical;"></textarea>
-        </div>
+      <div style="font-size:10px;font-weight:700;color:#374151;margin:10px 0 5px;">Giorni preferenza ricontatto</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+        ${gg.map(g=>`<label style="display:flex;align-items:center;gap:4px;font-size:12px;padding:4px 9px;border-radius:12px;border:1px solid #e0e6ed;background:white;cursor:pointer;"><input type="checkbox" class="m_giorno" value="${g}" style="accent-color:#047857;"> ${g}</label>`).join('')}
       </div>
-
-      <div class="card" style="margin-bottom:16px;background:#eff6ff;border:1px solid #bfdbfe;">
-        <div style="font-size:11px;font-weight:700;color:#1d4ed8;text-transform:uppercase;margin-bottom:12px;letter-spacing:0.5px;">Assegnazione Commerciale *</div>
-        <div class="form-group">
-          <label>Commerciale destinatario</label>
-          <select id="m_comm">${optsComm}</select>
-        </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div><div style="font-size:10px;font-weight:600;color:#374151;margin-bottom:3px;">Mattino dalle/alle</div><div style="display:flex;gap:4px;"><input type="time" id="m_mDal" style="flex:1;padding:5px;border:1px solid #ccd1d9;border-radius:4px;font-size:11px;"><input type="time" id="m_mAl" style="flex:1;padding:5px;border:1px solid #ccd1d9;border-radius:4px;font-size:11px;"></div></div>
+        <div><div style="font-size:10px;font-weight:600;color:#374151;margin-bottom:3px;">Pomeriggio dalle/alle</div><div style="display:flex;gap:4px;"><input type="time" id="m_pDal" style="flex:1;padding:5px;border:1px solid #ccd1d9;border-radius:4px;font-size:11px;"><input type="time" id="m_pAl" style="flex:1;padding:5px;border:1px solid #ccd1d9;border-radius:4px;font-size:11px;"></div></div>
       </div>
-
-      <div id="m_msg" style="display:none;padding:12px;border-radius:6px;font-weight:bold;font-size:13px;margin-bottom:12px;"></div>
-      <button onclick="salvaMobileContatto()" style="width:100%;padding:14px;background:#0d9488;color:white;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(13,148,136,0.3);">
-        &#10003; Salva Contatto
-      </button>
-      ${listaHtml}
-    </div>`;
+    </div>
+    <div class="card" style="margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:700;color:#2563eb;text-transform:uppercase;margin-bottom:10px;">B — Primo Contatto</div>
+      <div class="form-group"><label>Come ci ha conosciuti</label><select id="m_come"><option value="">--</option><option>Showroom</option><option>Web / Internet</option><option>Passaparola</option><option>Fiera / Evento</option><option>Pubblicita</option><option>Social Media</option><option>Altro</option></select></div>
+      <div class="form-group"><label>Mezzo Primo Contatto</label><select id="m_mezzo"><option value="">--</option><option>Telefono</option><option>E-mail</option><option>Di persona</option><option>WhatsApp</option><option>Web form</option></select></div>
+    </div>
+    <div class="card" style="margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:700;color:#7c3aed;text-transform:uppercase;margin-bottom:10px;">C — Contesto Intervento</div>
+      <div class="form-group"><label>Tipo Intervento</label><select id="m_tipo"><option value="">--</option><option>Nuova costruzione</option><option>Sostituzione</option><option>Ristrutturazione</option><option>Sola fornitura</option></select></div>
+      <div class="form-group"><label>Tipo Edificio</label><select id="m_edificio"><option value="">--</option><option>Casa singola</option><option>Bifamiliare</option><option>Ville a schiera</option><option>Condominio</option></select></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div class="form-group" style="margin:0;"><label>Piano (condominio)</label><input type="text" id="m_piano" placeholder="Es. 3"></div>
+        <div class="form-group" style="margin:0;"><label>Persone coinvolte</label><input type="text" id="m_pers" placeholder="Es. marito e moglie"></div>
+      </div>
+      <div style="font-size:10px;font-weight:700;color:#374151;margin:10px 0 6px;">Prodotti di Interesse</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+        ${prodotti.map(p=>`<label style="display:flex;align-items:center;gap:5px;font-size:11px;padding:5px 9px;border-radius:14px;border:1px solid #e0e6ed;background:white;cursor:pointer;"><input type="checkbox" class="m_prodotto" value="${p}" style="accent-color:#047857;"> ${p}</label>`).join('')}
+      </div>
+      <div class="form-group"><label>Motivazione dell'intervento</label><textarea id="m_motiv" rows="2" style="width:100%;padding:8px;border:1px solid #ccd1d9;border-radius:6px;font-size:13px;box-sizing:border-box;resize:vertical;" placeholder="Perche valuta l'intervento..."></textarea></div>
+      <div class="form-group"><label>Note Tecniche</label><textarea id="m_note" rows="2" style="width:100%;padding:8px;border:1px solid #ccd1d9;border-radius:6px;font-size:13px;box-sizing:border-box;resize:vertical;" placeholder="Vincoli, materiali, tempistiche..."></textarea></div>
+    </div>
+    <div class="card" style="margin-bottom:16px;background:#f0fdf4;border:1px solid #047857;">
+      <div style="font-size:11px;font-weight:700;color:#047857;text-transform:uppercase;margin-bottom:10px;">Assegnazione Commerciale *</div>
+      <div class="form-group"><label>Commerciale destinatario</label><select id="m_comm">${optsComm}</select></div>
+      <p style="font-size:11px;color:#047857;margin:4px 0 0;">Il commerciale trovera questa scheda nel pannello Contatti della web app.</p>
+    </div>
+    <div id="m_msg" style="display:none;padding:12px;border-radius:6px;font-weight:bold;font-size:13px;margin-bottom:12px;"></div>
+    <button onclick="salvaMobileContatto()" style="width:100%;padding:14px;background:linear-gradient(135deg,#047857,#065f46);color:white;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(4,120,87,0.3);">&#10003; Salva Contatto</button>
+    ${listaHtml}
+  </div>`;
 }
 
 async function salvaMobileContatto() {
-  const comm  = document.getElementById('m_comm')  ? document.getElementById('m_comm').value  : '';
-  const nome  = document.getElementById('m_nome')  ? document.getElementById('m_nome').value.trim()  : '';
-  const cogn  = document.getElementById('m_cognome')? document.getElementById('m_cognome').value.trim(): '';
-  const ragSoc= document.getElementById('m_ragSoc') ? document.getElementById('m_ragSoc').value.trim() : '';
-  const msgEl = document.getElementById('m_msg');
-
-  function showMsg(txt, ok) {
-    if (!msgEl) return;
-    msgEl.textContent = txt;
-    msgEl.style.background = ok ? '#eafaf1' : '#fadbd8';
-    msgEl.style.color = ok ? '#1e8449' : '#c0392b';
-    msgEl.style.display = 'block';
-    if (ok) setTimeout(() => { msgEl.style.display = 'none'; }, 4000);
-  }
-
-  if (!comm) { showMsg('Seleziona il commerciale destinatario.', false); return; }
-  if (!nome && !cogn && !ragSoc) { showMsg('Inserisci almeno Nome/Cognome o Ragione Sociale.', false); return; }
-
-  const prodotti = Array.from(document.querySelectorAll('.m_prodotto:checked')).map(cb => cb.value).join(', ');
-
-  try {
-    const r = await apiPost({
-      _azione: 'registraContatto',
-      inseritoDa: STATE.user,
-      commercialeAssegnato: comm,
-      nome, cognome: cogn, ragioneSociale: ragSoc,
-      telefono:      document.getElementById('m_tel')     ? document.getElementById('m_tel').value.trim()     : '',
-      email:         document.getElementById('m_email')   ? document.getElementById('m_email').value.trim()   : '',
-      comuneCliente: document.getElementById('m_comune')  ? document.getElementById('m_comune').value.trim()  : '',
-      provinciaCliente: (document.getElementById('m_prov') ? document.getElementById('m_prov').value.trim() : '').toUpperCase(),
-      comeConosciuti:   document.getElementById('m_come') ? document.getElementById('m_come').value : '',
-      mezzoPrimoContatto: document.getElementById('m_mezzo') ? document.getElementById('m_mezzo').value : '',
-      tipoIntervento: document.getElementById('m_tipo')    ? document.getElementById('m_tipo').value    : '',
-      tipoEdificio:   document.getElementById('m_edificio')? document.getElementById('m_edificio').value : '',
-      prodottiInteresse: prodotti,
-      noteTecniche:   document.getElementById('m_note')   ? document.getElementById('m_note').value.trim()   : ''
+  const comm=document.getElementById('m_comm')?.value||'';
+  const nome=document.getElementById('m_nome')?.value.trim()||'';
+  const cogn=document.getElementById('m_cognome')?.value.trim()||'';
+  const ragS=document.getElementById('m_ragSoc')?.value.trim()||'';
+  const msgEl=document.getElementById('m_msg');
+  function showMsg(txt,ok){if(!msgEl)return;msgEl.textContent=txt;msgEl.style.background=ok?'#eafaf1':'#fadbd8';msgEl.style.color=ok?'#1e8449':'#c0392b';msgEl.style.display='block';if(ok)setTimeout(()=>{msgEl.style.display='none';},4000);}
+  if(!comm){showMsg('Seleziona il commerciale destinatario.',false);return;}
+  if(!nome&&!cogn&&!ragS){showMsg('Inserisci Nome/Cognome o Ragione Sociale.',false);return;}
+  const prods=Array.from(document.querySelectorAll('.m_prodotto:checked')).map(cb=>cb.value).join(', ');
+  const ggSel=Array.from(document.querySelectorAll('.m_giorno:checked')).map(cb=>cb.value).join(', ');
+  const mDal=document.getElementById('m_mDal')?.value||'';
+  const mAl =document.getElementById('m_mAl') ?.value||'';
+  const pDal=document.getElementById('m_pDal')?.value||'';
+  const pAl =document.getElementById('m_pAl') ?.value||'';
+  let orari='';if(mDal)orari+='Mattino: '+mDal+'-'+mAl+' ';if(pDal)orari+='Pomeriggio: '+pDal+'-'+pAl;
+  try{
+    const r=await apiPost({
+      _azione:'registraContatto',inseritoDa:STATE.user,commercialeAssegnato:comm,
+      nome,cognome:cogn,ragioneSociale:ragS,
+      telefono:document.getElementById('m_tel')?.value.trim()||'',
+      email:document.getElementById('m_email')?.value.trim()||'',
+      responsabileInterno:document.getElementById('m_respInt')?.value.trim()||'',
+      indirizzoCliente:document.getElementById('m_ind')?.value.trim()||'',
+      civicoCliente:document.getElementById('m_civ')?.value.trim()||'',
+      capCliente:document.getElementById('m_cap')?.value.trim()||'',
+      comuneCliente:document.getElementById('m_com')?.value.trim()||'',
+      provinciaCliente:(document.getElementById('m_prov')?.value.trim()||'').toUpperCase(),
+      indirizzoCantiere:document.getElementById('m_indC')?.value.trim()||'',
+      capCantiere:document.getElementById('m_capC')?.value.trim()||'',
+      comuneCantiere:document.getElementById('m_comC')?.value.trim()||'',
+      provCantiere:(document.getElementById('m_provC')?.value.trim()||'').toUpperCase(),
+      orariPreferenza:orari.trim(),giorniPreferenza:ggSel,
+      comeConosciuti:document.getElementById('m_come')?.value||'',
+      mezzoPrimoContatto:document.getElementById('m_mezzo')?.value||'',
+      tipoIntervento:document.getElementById('m_tipo')?.value||'',
+      tipoEdificio:document.getElementById('m_edificio')?.value||'',
+      pianoCondominio:document.getElementById('m_piano')?.value.trim()||'',
+      personeCoinvolte:document.getElementById('m_pers')?.value.trim()||'',
+      prodottiInteresse:prods,
+      motivazione:document.getElementById('m_motiv')?.value.trim()||'',
+      noteTecniche:document.getElementById('m_note')?.value.trim()||''
     });
-    if (r && r.errore) { showMsg('Errore: ' + r.errore, false); return; }
-    showMsg('Contatto salvato con successo!', true);
-    // Reset form
-    ['m_nome','m_cognome','m_ragSoc','m_tel','m_email','m_comune','m_prov','m_note'].forEach(id => {
-      const e = document.getElementById(id); if (e) e.value = '';
-    });
-    ['m_come','m_mezzo','m_tipo','m_edificio'].forEach(id => {
-      const e = document.getElementById(id); if (e) e.selectedIndex = 0;
-    });
-    document.querySelectorAll('.m_prodotto').forEach(cb => cb.checked = false);
-  } catch(e) {
-    showMsg('Errore di rete: ' + e.message, false);
-  }
+    if(r&&r.errore){showMsg('Errore: '+r.errore,false);return;}
+    showMsg('Contatto salvato con successo!',true);
+    ['m_nome','m_cognome','m_ragSoc','m_tel','m_email','m_respInt','m_ind','m_civ','m_cap','m_com','m_prov','m_indC','m_capC','m_comC','m_provC','m_mDal','m_mAl','m_pDal','m_pAl','m_piano','m_pers','m_motiv','m_note'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+    ['m_come','m_mezzo','m_tipo','m_edificio'].forEach(id=>{const e=document.getElementById(id);if(e)e.selectedIndex=0;});
+    document.querySelectorAll('.m_prodotto,.m_giorno').forEach(cb=>cb.checked=false);
+  }catch(e){showMsg('Errore di rete: '+e.message,false);}
 }
