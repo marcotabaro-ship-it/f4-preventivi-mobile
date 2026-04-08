@@ -188,6 +188,8 @@ function handleLoginSuccess(res) {
     loadConfigTemplate();
   }
 
+  const navContIn = document.getElementById('navContatti');
+  if (navContIn) navContIn.style.display = 'flex';
   navigateTo(STATE.isUfficio ? 'lavorazione' : 'kpi');
 }
 
