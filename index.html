@@ -67,14 +67,14 @@
 
   <!-- HEADER FISSO -->
   <header id="appHeader">
-    <img src="icon.png"
-         class="header-logo" alt="F4">
+    <img src="icon.png" class="header-logo" alt="F4">
     <div class="header-info">
       <span class="header-title">Preventivi F4</span>
       <span id="headerUser" class="header-user"></span>
     </div>
     <div class="header-actions">
       <button class="icon-btn" onclick="loadData()" title="Aggiorna dati">🔄</button>
+      <button class="icon-btn" onclick="openReportDrawer()" title="Report Tempi">📊</button>
       <button class="icon-btn" onclick="openFilterDrawer()" title="Filtri e periodo">⚙️</button>
       <button class="icon-btn" onclick="logout()" title="Disconnetti">🚪</button>
     </div>
@@ -88,11 +88,11 @@
 
   <!-- AREA CONTENUTO PRINCIPALE -->
   <main id="mainContent">
-    <div id="pageKpi"        class="page" style="display:none"></div>
+    <div id="pageKpi"         class="page" style="display:none"></div>
     <div id="pageLavorazione" class="page" style="display:none"></div>
-    <div id="pageRicevuti"   class="page" style="display:none"></div>
-    <div id="pageVinti"      class="page" style="display:none"></div>
-    <div id="pageRubrica"    class="page" style="display:none"></div>
+    <div id="pageRicevuti"    class="page" style="display:none"></div>
+    <div id="pageVinti"       class="page" style="display:none"></div>
+    <div id="pageRubrica"     class="page" style="display:none"></div>
   </main>
 
   <!-- NAVIGAZIONE INFERIORE -->
@@ -119,11 +119,11 @@
     </button>
   </nav>
 
-  <!-- OVERLAY FILTRI -->
+  <!-- OVERLAY CONDIVISO -->
   <div id="filterOverlay" class="drawer-overlay" style="display:none"
-       onclick="closeFilterDrawer()"></div>
+       onclick="closeAllDrawers()"></div>
 
-  <!-- DRAWER FILTRI (slide-up dal basso) -->
+  <!-- DRAWER FILTRI DATI -->
   <div id="filterDrawer" class="filter-drawer">
     <div class="drawer-handle"></div>
     <h3 class="drawer-title">⚙️ Filtri e Periodo Estrazione</h3>
@@ -171,6 +171,73 @@
     </div>
 
     <p id="lastUpdateInfo" class="last-update-info"></p>
+  </div>
+
+  <!-- DRAWER REPORT TEMPI -->
+  <div id="reportDrawer" class="filter-drawer">
+    <div class="drawer-handle"></div>
+    <h3 class="drawer-title">📊 Report Tempi di Lavorazione</h3>
+
+    <div class="report-info-box">
+      <p>Il report calcola i <strong>giorni lavorativi</strong> per ogni fase del preventivo:</p>
+      <div class="report-legend">
+        <div class="legend-item"><span class="legend-dot" style="background:#34495e"></span> Lavorazione: inserimento → ricezione</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#7f8c8d"></span> Evasione: ricezione → consegna</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#e67e22"></span> Attesa esito: consegna → chiusura</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#2c3e50"></span> Totale: inserimento → chiusura</div>
+      </div>
+      <p class="report-note">I preventivi ancora aperti mostrano solo le fasi disponibili.</p>
+    </div>
+
+    <div class="drawer-section">
+      <label>Periodo (Data Inserimento)</label>
+      <div class="date-row">
+        <div class="form-group-small">
+          <label>Dal</label>
+          <input type="date" id="reportDal">
+        </div>
+        <div class="form-group-small">
+          <label>Al</label>
+          <input type="date" id="reportAl">
+        </div>
+      </div>
+    </div>
+
+    <div id="reportCommBox" class="drawer-section" style="display:none">
+      <label>Commerciale</label>
+      <select id="reportComm">
+        <option value="">Tutti</option>
+      </select>
+    </div>
+
+    <div class="drawer-section">
+      <label>Stato Finale</label>
+      <select id="reportStato">
+        <option value="">Tutti (compresi aperti)</option>
+        <option value="VINTO">Solo Vinti</option>
+        <option value="PERSO">Solo Persi</option>
+        <option value="DA REVISIONARE">Solo Da Revisionare</option>
+        <option value="APERTO">Solo Aperti</option>
+      </select>
+    </div>
+
+    <div class="drawer-section">
+      <label>Tipo Intervento</label>
+      <select id="reportTipo">
+        <option value="">Tutti</option>
+        <option value="Nuova costruzione">Nuova costruzione</option>
+        <option value="Sostituzione">Sostituzione</option>
+        <option value="Ristrutturazione">Ristrutturazione</option>
+        <option value="Sola fornitura">Sola fornitura</option>
+      </select>
+    </div>
+
+    <div class="drawer-buttons">
+      <button class="btn-secondary" onclick="closeAllDrawers()">✕ Chiudi</button>
+      <button class="btn-primary btn-report" onclick="generateReportPDF()">🖨️ Genera PDF</button>
+    </div>
+
+    <div id="reportPreview" class="report-preview" style="display:none"></div>
   </div>
 
 </div><!-- /appScreen -->
