@@ -586,3 +586,48 @@ input, select, button, textarea { font-family: inherit; }
 .section-divider::after {
   content: ''; flex: 1; height: 1px; background: #e8ecf0;
 }
+
+
+/* ============================================================
+   REPORT TEMPI — STILI DRAWER E ANTEPRIMA
+   ============================================================ */
+
+.btn-report { background: #8e44ad !important; }
+.btn-report:active { background: #6c3483 !important; }
+
+.report-info-box {
+  background: #f8f9fa; border-radius: 10px;
+  padding: 14px 16px; margin-bottom: 20px;
+  border-left: 4px solid #8e44ad;
+}
+.report-info-box p {
+  font-size: 13px; color: #2d3436; margin-bottom: 10px; line-height: 1.5;
+}
+.report-note {
+  font-size: 11px !important; color: #95a5a6 !important;
+  font-style: italic; margin-top: 8px !important; margin-bottom: 0 !important;
+}
+.report-legend { display: flex; flex-direction: column; gap: 5px; margin-bottom: 6px; }
+.legend-item {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: #636e72;
+}
+.legend-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+}
+
+.report-preview {
+  margin-top: 18px; background: #f8f9fa;
+  border-radius: 10px; padding: 14px;
+  border: 1px solid #e8ecf0;
+}
+.report-preview h4 {
+  font-size: 13px; color: #2d3436; margin-bottom: 10px; font-weight: 800;
+}
+.report-stat-row {
+  display: flex; justify-content: space-between;
+  padding: 6px 0; border-bottom: 1px solid #e8ecf0;
+  font-size: 12px; color: #636e72;
+}
+.report-stat-row:last-child { border-bottom: none; }
+.report-stat-val { font-weight: 800; color: #2d3436; }
